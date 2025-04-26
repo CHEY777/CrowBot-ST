@@ -8,16 +8,18 @@ import {fileURLToPath, pathToFileURL} from 'url'
 import {platform} from 'process'
 import * as ws from 'ws'
 import fs, {readdirSync, statSync, unlinkSync, existsSync, mkdirSync, readFileSync, rmSync, watch} from 'fs'
-import yargs from 'yargs'
+import yargs from 'yargs';
 import {spawn} from 'child_process'
 import lodash from 'lodash'
-import { yukiJadiBot } from './plugins/jadibot-serbot.js'
+import { yukiJadiBot } from './plugins/jadibot-serbot.js';
 import chalk from 'chalk'
 import syntaxerror from 'syntax-error'
 import {tmpdir} from 'os'
 import {format} from 'util'
 import boxen from 'boxen'
+import P from 'pino'
 import pino from 'pino'
+import Pino from 'pino'
 import path, { join, dirname } from 'path'
 import {Boom} from '@hapi/boom'
 import {makeWASocket, protoType, serialize} from './lib/simple.js'
@@ -31,11 +33,15 @@ const phoneUtil = PhoneNumberUtil.getInstance()
 const {DisconnectReason, useMultiFileAuthState, MessageRetryMap, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser} = await import('@whiskeysockets/baileys')
 import readline, { createInterface } from 'readline'
 import NodeCache from 'node-cache'
+const {CONNECTING} = ws
+const {chain} = lodash
 const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
 
+//const yuw = dirname(fileURLToPath(import.meta.url))
+//let require = createRequire(megu)
 let { say } = cfonts
 
-console.log(chalk.bold.redBright(`\n✰ Starting CrowBot ✰\n`))
+console.log(chalk.bold.redBright(`\n✰ Iniciando CrowBot ✰\n`))
 
 say('CrowBot', {
 font: 'block',
@@ -68,6 +74,7 @@ const __dirname = global.__dirname(import.meta.url)
 
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
 global.prefix = new RegExp('^[#/!.]')
+// global.opts['db'] = process.env['db']
 
 global.db = new Low(/https?:\/\//.test(opts['db'] || '') ? new cloudDBAdapter(opts['db']) : new JSONFile('./media/database/database.json'))
 
@@ -93,7 +100,7 @@ sticker: {},
 settings: {},
 ...(global.db.data || {}),
 }
-global.db.chain = lodash.chain(global.db.data)
+global.db.chain = chain(global.db.data)
 }
 loadDatabase()
 
@@ -118,10 +125,10 @@ opcion = '1'
 }
 if (!methodCodeQR && !methodCode && !fs.existsSync(`./${sessions}/creds.json`)) {
 do {
-opcion = await question(colores('⌨ Select an option:\n') + opcionQR('1. With QR code\n') + opcionTexto('2. With 8-digit text code\n--> '))
+opcion = await question(colores('⌨ Seleccione una opción:\n') + opcionQR('1. Con código QR\n') + opcionTexto('2. Con código de texto de 8 dígitos\n--> '))
 
 if (!/^[1-2]$/.test(opcion)) {
-console.log(chalk.bold.redBright(`✦ Only numbers 1 or 2 are allowed, no letters or special characters.`))
+console.log(chalk.bold.redBright(`✦ No se permiten numeros que no sean 1 o 2, tampoco letras o símbolos especiales.`))
 }} while (opcion !== '1' && opcion !== '2' || fs.existsSync(`./${sessions}/creds.json`))
 } 
 
@@ -135,7 +142,7 @@ mobile: MethodMobile,
 browser: opcion == '1' ? [`${nameqr}`, 'Edge', '20.0.04'] : methodCodeQR ? [`${nameqr}`, 'Edge', '20.0.04'] : ['Ubuntu', 'Edge', '110.0.1587.56'],
 auth: {
 creds: state.creds,
-keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+keys: makeCacheableSignalKeyStore(state.keys, Pino({ level: "fatal" }).child({ level: "fatal" })),
 },
 markOnlineOnConnect: true, 
 generateHighQualityLinkPreview: true, 
@@ -161,7 +168,7 @@ if (!!phoneNumber) {
 addNumber = phoneNumber.replace(/[^0-9]/g, '')
 } else {
 do {
-phoneNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✦ Please enter the WhatsApp number.\n${chalk.bold.yellowBright(`✏ Example: +919876543210 or +57321×××××××`)}\n${chalk.bold.magentaBright('---> ')}`)))
+phoneNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✦ Por favor, Ingrese el número de WhatsApp.\n${chalk.bold.yellowBright(`✏  Ejemplo: 57321×××××××`)}\n${chalk.bold.magentaBright('---> ')}`)))
 phoneNumber = phoneNumber.replace(/\D/g,'')
 if (!phoneNumber.startsWith('+')) {
 phoneNumber = `+${phoneNumber}`
@@ -172,22 +179,23 @@ addNumber = phoneNumber.replace(/\D/g, '')
 setTimeout(async () => {
 let codeBot = await conn.requestPairingCode(addNumber)
 codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot
-console.log(chalk.bold.white(chalk.bgMagenta(`✧ PAIRING CODE ✧`)), chalk.bold.white(chalk.white(codeBot)))
+console.log(chalk.bold.white(chalk.bgMagenta(`✧ CÓDIGO DE VINCULACIÓN ✧`)), chalk.bold.white(chalk.white(codeBot)))
 }, 3000)
 }}}
 }
 
 conn.isInit = false;
 conn.well = false;
+//conn.logger.info(`✦  H E C H O\n`)
 
 if (!opts['test']) {
 if (global.db) setInterval(async () => {
 if (global.db.data) await global.db.write()
-if (opts['autocleartmp'] && (global.support || {}).find) {
-const tmp = [tmpdir(), 'tmp', `${jadi}`]
-tmp.forEach((filename) => spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete']))
-}}, 30 * 1000);
+if (opts['autocleartmp'] && (global.support || {}).find) (tmp = [os.tmpdir(), 'tmp', `${jadi}`], tmp.forEach((filename) => cp.spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete'])));
+}, 30 * 1000);
 }
+
+// if (opts['server']) (await import('./server.js')).default(global.conn, PORT);
 
 async function connectionUpdate(update) {
 const {connection, lastDisconnect, isNewLogin} = update;
@@ -201,34 +209,34 @@ global.timestamp.connect = new Date;
 if (global.db.data == null) loadDatabase();
 if (update.qr != 0 && update.qr != undefined || methodCodeQR) {
 if (opcion == '1' || methodCodeQR) {
-console.log(chalk.bold.yellow(`\n❐ SCAN THE QR CODE, EXPIRES IN 45 SECONDS`))}
+console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR EXPIRA EN 45 SEGUNDOS`))}
 }
 if (connection == 'open') {
-console.log(chalk.bold.green('\n❀ CrowBot-MD Successfully Connected ❀'))
+console.log(chalk.bold.green('\n❀ CrowBot-MD Conectado con éxito ❀'))
 }
 let reason = new Boom(lastDisconnect?.error)?.output?.statusCode
 if (connection === 'close') {
 if (reason === DisconnectReason.badSession) {
-console.log(chalk.bold.cyanBright(`\n⚠︎ NO CONNECTION, DELETE THE ${global.sessions} FOLDER AND SCAN QR CODE ⚠︎`))
+console.log(chalk.bold.cyanBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
 } else if (reason === DisconnectReason.connectionClosed) {
-console.log(chalk.bold.magentaBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹\n┆ ⚠︎ CONNECTION CLOSED, RECONNECTING....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹`))
+console.log(chalk.bold.magentaBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹\n┆ ⚠︎ CONEXION CERRADA, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.connectionLost) {
-console.log(chalk.bold.blueBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂\n┆ ⚠︎ CONNECTION LOST WITH SERVER, RECONNECTING....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂`))
+console.log(chalk.bold.blueBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂\n┆ ⚠︎ CONEXIÓN PERDIDA CON EL SERVIDOR, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.connectionReplaced) {
-console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ CONNECTION REPLACED, ANOTHER SESSION OPENED, PLEASE CLOSE CURRENT SESSION FIRST.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
+console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ CONEXIÓN REEMPLAZADA, SE HA ABIERTO OTRA NUEVA SESION, POR FAVOR, CIERRA LA SESIÓN ACTUAL PRIMERO.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
 } else if (reason === DisconnectReason.loggedOut) {
-console.log(chalk.bold.redBright(`\n⚠︎ NO CONNECTION, DELETE THE ${global.sessions} FOLDER AND SCAN QR CODE ⚠︎`))
+console.log(chalk.bold.redBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.restartRequired) {
-console.log(chalk.bold.cyanBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓\n┆ ✧ CONNECTING TO SERVER...\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓`))
+console.log(chalk.bold.cyanBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓\n┆ ✧ CONECTANDO AL SERVIDOR...\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.timedOut) {
-console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸\n┆ ⧖ CONNECTION TIMED OUT, RECONECTING....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸`))
-await global.reloadHandler(true).catch(console.error)
+console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸\n┆ ⧖ TIEMPO DE CONEXIÓN AGOTADO, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸`))
+await global.reloadHandler(true).catch(console.error) //process.send('reset')
 } else {
-console.log(chalk.bold.redBright(`\n⚠︎！ UNKNOWN DISCONNECTION REASON: ${reason || 'Not found'} >> ${connection || 'Not found'}`))
+console.log(chalk.bold.redBright(`\n⚠︎！ RAZON DE DESCONEXIÓN DESCONOCIDA: ${reason || 'No encontrado'} >> ${connection || 'No encontrado'}`))
 }}
 }
 process.on('uncaughtException', console.error)
@@ -277,14 +285,16 @@ isInit = false
 return true
 };
 
+//Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
+
 global.rutaJadiBot = join(__dirname, './JadiBots')
 
 if (global.yukiJadibts) {
 if (!existsSync(global.rutaJadiBot)) {
 mkdirSync(global.rutaJadiBot, { recursive: true }) 
-console.log(chalk.bold.cyan(`Folder created: ${jadi}`))
+console.log(chalk.bold.cyan(`La carpeta: ${jadi} se creó correctamente.`))
 } else {
-console.log(chalk.bold.cyan(`Folder already exists: ${jadi}`)) 
+console.log(chalk.bold.cyan(`La carpeta: ${jadi} ya está creada.`)) 
 }
 
 const readRutaJadiBot = readdirSync(rutaJadiBot)
@@ -363,7 +373,7 @@ p.on('error', (_) => resolve(false));
 })]);
 }));
 const [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test;
-global.support = {ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find};
+const s = global.support = {ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find};
 Object.freeze(global.support);
 }
 
@@ -403,11 +413,11 @@ unlinkSync(`./${jadi}/${directorio}/${fileInDir}`)
 }})
 }})
 if (SBprekey.length === 0) {
-console.log(chalk.bold.green(`\n╭» ❍ ${jadi} ❍\n│→ NOTHING TO DELETE \n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎`))
+console.log(chalk.bold.green(`\n╭» ❍ ${jadi} ❍\n│→ NADA POR ELIMINAR \n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎`))
 } else {
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ${jadi} ❍\n│→ NON-ESSENTIAL FILES DELETED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎︎`))
+console.log(chalk.bold.cyanBright(`\n╭» ❍ ${jadi} ❍\n│→ ARCHIVOS NO ESENCIALES ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎︎`))
 }} catch (err) {
-console.log(chalk.bold.red(`\n╭» ❍ ${jadi} ❍\n│→ AN ERROR OCCURRED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻\n` + err))
+console.log(chalk.bold.red(`\n╭» ❍ ${jadi} ❍\n│→ OCURRIÓ UN ERROR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻\n` + err))
 }}
 
 function purgeOldFiles() {
@@ -420,21 +430,31 @@ if (file !== 'creds.json') {
 const filePath = path.join(dir, file);
 unlinkSync(filePath, err => {
 if (err) {
-console.log(chalk.bold.red(`\n╭» ❍ FILE ❍\n│→ ${file} COULD NOT BE DELETED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ✘\n` + err))
+console.log(chalk.bold.red(`\n╭» ❍ ARCHIVO ❍\n│→ ${file} NO SE LOGRÓ BORRAR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ✘\n` + err))
 } else {
-console.log(chalk.bold.green(`\n╭» ❍ FILE ❍\n│→ ${file} SUCCESSFULLY DELETED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+console.log(chalk.bold.green(`\n╭» ❍ ARCHIVO ❍\n│→ ${file} BORRADO CON ÉXITO\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
 } }) }
-}) }) }
+}) }) }) }
+
+function redefineConsoleMethod(methodName, filterStrings) {
+const originalConsoleMethod = console[methodName]
+console[methodName] = function() {
+const message = arguments[0]
+if (typeof message === 'string' && filterStrings.some(filterString => message.includes(atob(filterString)))) {
+arguments[0] = ""
+}
+originalConsoleMethod.apply(console, arguments)
+}}
 
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
 await clearTmp()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ TMP FOLDER FILES DELETED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 4)
+console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 4) // 4 min 
 
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
 await purgeSession()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ NON-ESSENTIAL SESSIONS DELETED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10)
+console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10) // 10 min
 
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
@@ -443,27 +463,20 @@ await purgeSessionSB()}, 1000 * 60 * 10)
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
 await purgeOldFiles()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ FILES ❍\n│→ RESIDUAL FILES DELETED\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10)
+console.log(chalk.bold.cyanBright(`\n╭» ❍ ARCHIVOS ❍\n│→ ARCHIVOS RESIDUALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10)
 
-_quickTest().then(() => conn.logger.info(chalk.bold(`✦ DONE\n`.trim()))).catch(console.error)
+_quickTest().then(() => conn.logger.info(chalk.bold(`✦  H E C H O\n`.trim()))).catch(console.error)
 
 async function isValidPhoneNumber(number) {
 try {
-number = number.replace(/[\s-]+/g, '')
-if (!number.startsWith('+91')) {
-if (/^[6-9]\d{9}$/.test(number)) {
-number = `+91${number}`
-} else if (number.startsWith('91') && /^[6-9]\d{9}$/.test(number.slice(2))) {
-number = `+${number}`
-}}
+number = number.replace(/\s+/g, '')
 if (number.startsWith('+521')) {
-number = number.replace('+521', '+52')
+number = number.replace('+521', '+52');
 } else if (number.startsWith('+52') && number[4] === '1') {
-number = number.replace('+52 1', '+52')
+number = number.replace('+52 1', '+52');
 }
 const parsedNumber = phoneUtil.parseAndKeepRawInput(number)
 return phoneUtil.isValidNumber(parsedNumber)
 } catch (error) {
-console.log(chalk.bold.red(`Invalid phone number format: ${number}`))
 return false
 }}
