@@ -78,7 +78,22 @@ global.channel = 'https://whatsapp.com/channel/0029Vb9t1Xk8fewhfbTZeT2c'
 global.insta = 'https://www.instagram.com/its_chey7?utm_source=qr&igsh=MWM1YW12cDJhYmQ1'
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
-global.estilo = { key: {  fromMe: false, participant: `0@s.whatsapp.net`, ...(false ? { remoteJid: "" } : {}) }, message: { orderMessage: { itemCount : -999999, status: 1, surface : 1, message: '👑【✫ᥴꫝꫀꪗ-𝙎𝙖𝙣💫🌙✨''✫', orderTitle: 'Bang', thumbnail: catalogo, sellerJid: '0@s.whatsapp.net'}}}
+global.estilo = {
+  key: {
+    fromMe: false,
+    participant: '0@s.whatsapp.net',
+    ...(false ? { remoteJid: '' } : {})
+  },
+  message: {
+    orderMessage: {
+      itemCount: -999999,
+      status: 1,
+      surface: 1,
+      message: '👑【✫ᥴꫝꫀꪗ-𝙎𝙖𝙣💫🌙✨✫】',
+      orderTitle: 'Bang',
+      thumbnail: catalogo,
+      sellerJid: '0@s.whatsapp.net'
+    }
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
