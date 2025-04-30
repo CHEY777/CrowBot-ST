@@ -1,7 +1,7 @@
-let handler = async (m, { isPrems, conn }) => {
+let handler = async (m, { conn }) => {
 
-let img = 'https://files.catbox.moe/7kh8e5.jpg' 
-let texto = `• 𝐌𝐄𝐍𝐔 +18 •
+  let img = 'https://files.catbox.moe/7kh8e5.jpg' 
+  let texto = `• 𝐌𝐄𝐍𝐔 +18 •
 「 🔞 *ADULT COMMANDS* 🔞 」
 
 ║➤ 🍒 _.xnxxsearch_ (texto)
@@ -20,20 +20,24 @@ let texto = `• 𝐌𝐄𝐍𝐔 +18 •
 ║➤ 🍒 _.violar_ (@tag)
 ║➤ 🍒 _.sixnine_ (@tag)`
 
- conn.sendMessage(m.chat, {
-        text: texto,
-        contextInfo: {
-        externalAdReply: {
+  await conn.sendMessage(m.chat, {
+    text: texto,
+    contextInfo: {
+      externalAdReply: {
         title: '𓂂𓏸  𐅹੭੭ ᴘᴏʀɴᴏɢʀᴀᴘʜʏ ᴍᴇɴᴜ 🌙 ᦡᦡ',
-        body: dev,
-        mediaUrl: img,
-        sourceUrl: channel,
-        mediaType: 2,
-        renderLargerThumbnail: true
-        }}},
-        { quoted: fkontak })
+        body: 'Adult Features Menu',
+        thumbnailUrl: img,
+        sourceUrl: img,
+        mediaType: 1,
+        renderLargerThumbnail: true,
+        showAdAttribution: false
+      }
+    }
+  }, { quoted: m }) // optional: quoted message can be kept or removed
 }
+
 handler.help = ['menuhot (menu +18)']
 handler.tags = ['crow']
 handler.command = ['menu18', 'menuhorny', 'menunsfw', 'menuhot'] 
+
 export default handler;
