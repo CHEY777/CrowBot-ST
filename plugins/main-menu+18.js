@@ -26,9 +26,9 @@ let texto = `• 𝐌𝐄𝐍𝐔 +18 •
         externalAdReply: {
         title: '𓂂𓏸  𐅹੭੭ ᴘᴏʀɴᴏɢʀᴀᴘʜʏ ᴍᴇɴᴜ 🌙 ᦡᦡ',
         body: dev,
-        thumbnailUrl: img,
+        mediaUrl: img,
         sourceUrl: channel,
-        mediaType: 1,
+        mediaType: 2,
         renderLargerThumbnail: true
         }}},
         { quoted: fkontak })
