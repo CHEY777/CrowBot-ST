@@ -24,9 +24,9 @@ let tags = {
 }
 
 const vid = 'https://files.catbox.moe/ic2ct6.mp4';
-const textbot = '★' // updated title
-const dev = 'Developer Name' // replace with your name if needed
-const redes = 'https://example.com' // replace with your URL
+const textbot = '𝓐𝔂𝓷𝓪💖🔮🌙🎀✨' // updated title
+const dev = 'ᥴꫝꫀꪗ-𝙎𝙖𝙣💫🌙✨' // replace with your name if needed
+const redes = 'https://www.instagram.com/its_chey7/#' // replace with your URL
 const emojis = '✨' // replace with any emoji
 const rcanal = null // keep as is if not defined elsewhere
 
