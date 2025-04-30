@@ -1,23 +1,11 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
 
-let grupos = `╭┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫\n\n☕︎︎ *Hola!, te invito a unirte a los grupos oficiales del Bot para convivir con la comunidad oficial* 💛
+let grupos = `╭┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫
 
-- ⧼★⧽ grᥙ⍴᥆ ᥆𝖿іᥴіᥲᥣ
-*❑* ${grupo}
+☕︎︎ *Hello! Join the official bot channel to connect with the community* 💛
 
-- ⧼★⧽ grᥙ⍴᥆ ᥆𝖿іᥴіᥲᥣ 𝗍ᥱᥲm
-*❑* ${gteam}
-
-- ⧼★⧽ grᥙ⍴᥆ ძᥱ s᥆⍴᥆r𝗍ᥱ
-*❑* ${gsupport}
-
-•┈┈┈┈┈┈••✦ ♡ ✦••┈┈┈┈┈┈•
- 
-
-⧼★⧽ ᥴᥲᥒᥲᥣ ᥆𝖿іᥴіᥲᥣ
-*❏* ${channel}
-
-> ${dev}
+⧼★⧽ Official Channel
+*❏* https://whatsapp.com/channel/0029Vb9t1Xk8fewhfbTZeT2c
 
 ╰┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈≫`
 
@@ -26,8 +14,8 @@ let img = 'https://files.catbox.moe/syfyfd.jpg';
 conn.sendMessage(m.chat, { image: { url: img }, caption: grupos }, { quoted: m });
 }
 
-handler.help = ['grupos']
+handler.help = ['groups']
 handler.tags = ['main']
-handler.command = ['grupos', 'crowgrupos', 'gruposcrow']
+handler.command = ['groups', 'crowgroups', 'groupcrow']
 
 export default handler
