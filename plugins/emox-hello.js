@@ -8,23 +8,22 @@ let handler = async (m, { conn, usedPrefix }) => {
     
     // Check if someone is mentioned or a message is quoted
     if (m.mentionedJid.length > 0) {
-        who = m.mentionedJid[0]; // If someone is mentioned, use them
+        who = m.mentionedJid[0];
     } else if (m.quoted) {
-        who = m.quoted.sender; // If a message is quoted, use the sender of that message
+        who = m.quoted.sender;
     } else {
-        who = m.sender; // Otherwise, use the sender
+        who = m.sender;
     }
 
-    let name = conn.getName(who); // Name of the mentioned person or sender
-    let name2 = conn.getName(m.sender); // Name of the user who sends the command
+    let name = conn.getName(who);
+    let name2 = conn.getName(m.sender);
     m.react('👋');
 
-    // Build the message depending on whether someone is mentioned or not
     let str;
     if (m.mentionedJid.length > 0) {
-        str = `\`${name2}\` hello \`${name || who}\`, how are you?`; // Use saved name or number
+        str = `\`${name2}\` hello \`${name || who}\`, how are you?`;
     } else if (m.quoted) {
-        str = `\`${name2}\` hello \`${name || who}\`, how are you feeling today?`; // Message when quoting another user
+        str = `\`${name2}\` hello \`${name || who}\`, how are you feeling today?`;
     } else {
         str = `\`${name2}\` greetings to everyone in the group, how are you all doing?`.trim();
     }
@@ -41,16 +40,31 @@ let handler = async (m, { conn, usedPrefix }) => {
         
         const videos = [pp, pp2, pp3, pp4, pp5, pp6, pp7, pp8];
         const video = videos[Math.floor(Math.random() * videos.length)];
+
+        const mentions = [who];
         
-        // Send the message with the selected video and message
-        let mentions = [who]; // Mention the user who was tagged or quoted
-        conn.sendMessage(m.chat, { video: { url: video }, gifPlayback: true, caption: str, mentions }, { quoted: m });
+        // Send video greeting message
+        await conn.sendMessage(m.chat, {
+            video: { url: video },
+            gifPlayback: true,
+            caption: str,
+            mentions
+        }, { quoted: m });
+
+        // Send voice menu audio
+        await conn.sendMessage(m.chat, {
+            audio: {
+                url: 'https://github.com/CHEY777/CHEY-DATA/raw/refs/heads/main/autovoice/menunew.m4a'
+            },
+            mimetype: 'audio/mp4',
+            ptt: true
+        }, { quoted: m });
     }
 }
 
 handler.help = ['hello/hola @tag'];
 handler.tags = ['emox'];
-handler.command = ['hello','hola'];
+handler.command = ['hello', 'hola'];
 handler.group = true;
 
 export default handler;
