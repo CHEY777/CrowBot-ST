@@ -11,10 +11,10 @@ import moment from 'moment-timezone'
 
 global.owner = [
    ['918116781147', 'ᥴꫝꫀꪗ-𝙎𝙖𝙣💫🌙✨', true],
-   ['918116781147', 'CrowBot Soporte', true],
-   ['918116781147', 'Dev chey', true],
-   ['918116781147', 'Dev codexchey', true],
-   ['918116781147', 'Dev ᥴꫝꫀꪗ𒆜', true]
+   ['918116781147', 'chey', true],
+   ['918116781147', 'chey', true],
+   ['918116781147', 'codexchey', true],
+   ['918116781147', 'ᥴꫝꫀꪗ𒆜', true]
 ]
 
 global.creadorbot = [
