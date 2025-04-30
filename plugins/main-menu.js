@@ -1,233 +1,180 @@
 import { promises } from 'fs'
 import { join } from 'path'
-import fetch from 'node-fetch'
 import { xpRange } from '../lib/levelling.js'
 
-let tags = {
-  'crow': '💖「 *`MENUS ANYABOT`* 」💖',
-  'main': '「INFO」✨',
-  'search': '「SEARCHES」✨',
-  'games': '「GAMES」✨',
-  'subBots': '「SUB BOTS」✨',
-  'rpg': '「RPG」✨',
-  'register': '「REGISTER」✨',
-  'stickers': '「STICKERS」✨',
-  'anime': '「ANIME」✨',
-  'database': '「DATABASE」✨',
-  'groups': '「GROUPS」✨',
-  'onOff': '「ON / OFF」✨',
-  'downloads': '「DOWNLOADS」✨',
-  'tools': '「TOOLS」✨',
-  'information': '「INFORMATION」✨',
-  'creator': '「CREATOR」✨',
-  'logoEditing': '「LOGO EDITING」✨',
+// ===== CONFIGURATION ===== //
+const botConfig = {
+  name: '𝓐𝔂𝓷𝓪💖🔮🌙🎀✨',
+  owner: 'ᥴꫝꫀꪗ-𝙎𝙖𝙣💫🌙✨',
+  social: 'https://www.instagram.com/its_chey7/#',
+  thumbnail: 'https://files.catbox.moe/syfyfd.jpg',
+  emoji: '✨'
 }
 
-const vid = 'https://files.catbox.moe/ic2ct6.mp4';
-const textbot = '𝓐𝔂𝓷𝓪💖🔮🌙🎀✨' // updated title
-const dev = 'ᥴꫝꫀꪗ-𝙎𝙖𝙣💫🌙✨' // replace with your name if needed
-const redes = 'https://www.instagram.com/its_chey7/#' // replace with your URL
-const emojis = '✨' // replace with any emoji
-const rcanal = null // keep as is if not defined elsewhere
+// ===== MENU CATEGORIES ===== //
+const categories = {
+  'main': '✨ MAIN MENU',
+  'info': 'ℹ️ BOT INFO',
+  'search': '🔍 SEARCH',
+  'download': '📥 DOWNLOAD',
+  'sticker': '🖼️ STICKER',
+  'group': '👥 GROUP',
+  'owner': '👑 OWNER',
+  'fun': '🎉 FUN',
+  'game': '🎮 GAME',
+  'rpg': '⚔️ RPG',
+  'tools': '🛠️ TOOLS'
+}
 
-const defaultMenu = {
-  before: `*•:•:•:•:•:•:•:•:•:•☾☼☽•:•.•:•.•:•:•:•:•:•*
-
-"「🔮」 ¡Hola! *%name* %greeting, To View Your Profile Use *#prefix* ❒"
-
-╔━━━━━ *⊱𝐈𝐍𝐅𝐎 - 𝐁𝐎𝐓⊰*
-✦  👤 *Client:* %name
-✦  📍 *Mod:* Public
-✧  ✨ *Baileys:* Multi Device
-✦  ☄️ *Active Time:* %muptime
-✧  💫 *Users:* %totalreg 
-╚━━━━━━━━━━━━━━
+// ===== MENU TEMPLATE ===== //
+const menuTemplate = {
+  before: `
+╭───「 ${botConfig.name} 」───╮
+│
+│ Hello *%name*! %greeting
+│ 
+│ ⏰ Time: %time
+│ 📅 Date: %date
+│ ⌚ Uptime: %uptime
+│
+│ Type *%prefixhelp* for info
+│ Type *%prefixmenu* for menu
+│
+╰─────────────────────╯
 %readmore
-*✧⋄⋆⋅⋆⋄✧⋄⋆⋅⋆⋄✧⋄⋆⋅⋆⋄✧⋄⋆⋅⋆⋄✧*\n\n> hello hello.
-
-\t*(✰◠‿◠) 𝐂 𝐨 𝐦 𝐦 𝐚 𝐧 𝐝 𝐬*   
-`.trimStart(),
-  header: '͜ ۬︵࣪᷼⏜݊᷼⏜࣪᷼✿⃘𐇽۫ꥈ࣪࣪࣪࣪࣪࣪࣪𝇈⃘۫ꥈ࣪࣪࣪࣪࣪𑁍ٜ𐇽࣪࣪࣪࣪࣪𝇈⃘۫ꥈ࣪࣪࣪࣪࣪✿݊᷼⏜࣪᷼⏜࣪᷼︵۬ ͜\n┊➳ %category \n͜ ۬︵࣪᷼⏜݊᷼⏜࣪᷼✿⃘𐇽۫ꥈ࣪࣪࣪࣪࣪࣪࣪𝇈⃘۫ꥈ࣪࣪࣪࣪࣪𑁍ٜ𐇽࣪࣪࣪࣪࣪𝇈⃘۫ꥈ࣪࣪࣪࣪࣪✿݊᷼⏜࣪᷼⏜࣪᷼︵۬ ͜',
-  body: '*┃⏤͟͟͞͞🍭➤›* %cmd',
-  footer: '*┗━*\n',
-  after: `> ${dev}`,
+`.trim(),
+  
+  header: '╭───「 %category 」───╮\n│',
+  body: '│ ➤ %cmd %isPremium',
+  footer: '│\n╰─────────────────────╯',
+  
+  after: `
+╭───「 CREDITS 」───╮
+│
+│ 🤖 Bot Name: ${botConfig.name}
+│ 👑 Creator: ${botConfig.owner}
+│ 💌 Follow: ${botConfig.social}
+│
+╰─────────────────────╯
+`.trim()
 }
 
+// ===== MAIN HANDLER ===== //
 let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
   try {
-    let _package = JSON.parse(await promises.readFile(join(__dirname, '../package.json')).catch(_ => ({}))) || {}
-    let { exp, estrellas, level, role } = global.db.data.users[m.sender]
-    let { min, xp, max } = xpRange(level, global.multiplier)
+    // User data
+    let user = global.db.data.users[m.sender] || {}
+    let { exp, limit, level, role } = user
+    let { min, xp, max } = xpRange(level, global.multiplier || 1)
     let name = await conn.getName(m.sender)
-    exp = exp || 'Desconocida';
-    role = role || 'Aldeano';
-    let d = new Date(new Date + 3600000)
-    let locale = 'es'
-    let weton = ['Pahing', 'Pon', 'Wage', 'Kliwon', 'Legi'][Math.floor(d / 84600000) % 5]
-    let week = d.toLocaleDateString(locale, { weekday: 'long' })
-    let date = d.toLocaleDateString(locale, {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    
+    // Time data
+    let d = new Date()
+    let time = d.toLocaleTimeString('en', { 
+      hour: 'numeric', 
+      minute: 'numeric', 
+      hour12: true 
     })
-    let dateIslamic = Intl.DateTimeFormat(locale + '-TN-u-ca-islamic', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(d)
-    let botinfo = (conn.user.jid == global.conn.user.jid ? 'Oficial' : 'Sub-Bot');
-
-    let time = d.toLocaleTimeString(locale, {
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric'
+    let date = d.toLocaleDateString('en', { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
     })
-    let _uptime = process.uptime() * 1000
-    let _muptime
-    if (process.send) {
-      process.send('uptime')
-      _muptime = await new Promise(resolve => {
-        process.once('message', resolve)
-        setTimeout(resolve, 1000)
-      }) * 1000
-    }
-    let muptime = clockString(_muptime)
-    let uptime = clockString(_uptime)
-    let totalreg = Object.keys(global.db.data.users).length
-    let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
-
-    let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => {
+    let uptime = clockString(process.uptime() * 1000)
+    
+    // Get all commands
+    let help = Object.values(global.plugins).filter(
+      plugin => !plugin.disabled
+    ).map(plugin => {
       return {
-        help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
+        help: Array.isArray(plugin.help) ? plugin.help : [plugin.help],
         tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
         prefix: 'customPrefix' in plugin,
-        estrellas: plugin.estrellas,
         premium: plugin.premium,
-        enabled: !plugin.disabled,
+        enabled: !plugin.disabled
       }
     })
 
-    for (let plugin of help)
-      if (plugin && 'tags' in plugin)
-        for (let tag of plugin.tags)
-          if (!(tag in tags) && tag) tags[tag] = tag
-
-    conn.menu = conn.menu ? conn.menu : {}
-    let before = conn.menu.before || defaultMenu.before
-    let header = conn.menu.header || defaultMenu.header
-    let body = conn.menu.body || defaultMenu.body
-    let footer = conn.menu.footer || defaultMenu.footer
-    let after = conn.menu.after || (conn.user.jid == conn.user.jid ? '' : `Powered by https://wa.me/${conn.user.jid.split`@`[0]}`) + defaultMenu.after
-
-    let _text = [
-      before,
-      ...Object.keys(tags).map(tag => {
-        return header.replace(/%category/g, tags[tag]) + '\n' + [
-          ...help.filter(menu => menu.tags && menu.tags.includes(tag) && menu.help).map(menu => {
-            return menu.help.map(help => {
-              return body.replace(/%cmd/g, menu.prefix ? help : '%p' + help)
-                .replace(/%isdiamond/g, menu.diamond ? '(ⓓ)' : '')
-                .replace(/%isPremium/g, menu.premium ? '(Ⓟ)' : '')
-                .trim()
-            }).join('\n')
-          }),
-          footer
+    // Build menu text
+    let text = [
+      menuTemplate.before,
+      ...Object.keys(categories).map(category => {
+        return [
+          menuTemplate.header.replace('%category', categories[category]),
+          ...help.filter(cmd => cmd.tags && cmd.tags.includes(category) && cmd.help)
+            .map(cmd => {
+              return cmd.help.map(help => {
+                return menuTemplate.body
+                  .replace('%cmd', cmd.prefix ? help : _p + help)
+                  .replace('%isPremium', cmd.premium ? '(💎)' : '')
+              }).join('\n')
+            }),
+          menuTemplate.footer
         ].join('\n')
       }),
-      after
+      menuTemplate.after
     ].join('\n')
 
-    let text = typeof conn.menu == 'string' ? conn.menu : typeof conn.menu == 'object' ? _text : ''
-    let replace = {
-      '%': '%',
-      p: _p, uptime, muptime,
-      me: conn.getName(conn.user.jid),
-      taguser: '@' + m.sender.split("@s.whatsapp.net")[0],
-      npmname: _package.name,
-      npmdesc: _package.description,
-      version: _package.version,
-      exp: exp - min,
-      maxexp: xp,
-      botofc: (conn.user.jid == global.conn.user.jid ? '💖 Chey' : `🎀Anya: Wa.me/${global.conn.user.jid.split`@`[0]}`),
-      totalexp: exp,
-      xp4levelup: max - exp,
-      github: _package.homepage ? _package.homepage.url || _package.homepage : '[unknown github url]',
-      greeting, level, estrellas, name, weton, week, date, dateIslamic, time, totalreg, rtotalreg, role,
-      readmore: readMore
-    }
-    text = text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
+    // Replace placeholders
+    text = text
+      .replace(/%name/g, name)
+      .replace(/%greeting/g, getGreeting())
+      .replace(/%prefix/g, _p)
+      .replace(/%time/g, time)
+      .replace(/%date/g, date)
+      .replace(/%uptime/g, uptime)
+      .replace(/%level/g, level || 0)
+      .replace(/%exp/g, exp || 0)
+      .replace(/%maxexp/g, xp || 0)
+      .replace(/%readmore/g, readMore)
 
-    await m.react(emojis)
-
-    let img = 'https://files.catbox.moe/syfyfd.jpg';
-
-    await conn.sendMessage(m.chat, {
+    // Send menu
+    await conn.sendMessage(m.chat, { 
       text: text.trim(),
       contextInfo: {
         mentionedJid: [m.sender],
-        isForwarded: true,
-        forwardingScore: 999,
         externalAdReply: {
-          title: textbot,
-          body: dev,
-          thumbnailUrl: img,
-          sourceUrl: redes,
-          mediaType: 1,
-          showAdAttribution: true,
-          renderLargerThumbnail: true,
-        },
-      },
+          title: `${botConfig.name} Menu`,
+          body: `Powered by ${botConfig.owner}`,
+          thumbnailUrl: botConfig.thumbnail,
+          sourceUrl: botConfig.social,
+          mediaType: 1
+        }
+      }
     }, { quoted: m })
+    
+    await m.react(botConfig.emoji)
 
   } catch (e) {
-    conn.reply(m.chat, `❌️ Sorry, the menu has an error. ${e.message}`, m, rcanal)
-    throw e
+    console.error('Menu error:', e)
+    await conn.reply(m.chat, `❌ Failed to load menu: ${e.message}`, m)
   }
 }
 
-handler.help = ['menu']
-handler.tags = ['main']
-handler.command = ['menu', 'help', 'menuall', 'allmenú', 'allmenu', 'menucompleto']
-handler.register = false
-
-export default handler
-
-const more = String.fromCharCode(8206)
-const readMore = more.repeat(4001)
-
+// ===== HELPER FUNCTIONS ===== //
 function clockString(ms) {
-  let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
-  let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-  let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
+  let h = Math.floor(ms / 3600000)
+  let m = Math.floor(ms / 60000) % 60
+  let s = Math.floor(ms / 1000) % 60
   return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
 }
 
-var ase = new Date();
-var hour = ase.getHours();
-switch (hour) {
-  case 0: hour = 'Good Night 🌙'; break;
-  case 1: hour = 'Good Night 💤'; break;
-  case 2: hour = 'Good Night 🦉'; break;
-  case 3: hour = 'Good Morning ✨'; break;
-  case 4: hour = 'Good Morning 💫'; break;
-  case 5: hour = 'Good Morning 🌅'; break;
-  case 6: hour = 'Good Morning 🌄'; break;
-  case 7: hour = 'Good Morning 🌅'; break;
-  case 8: hour = 'Good Morning 💫'; break;
-  case 9: hour = 'Good Morning ✨'; break;
-  case 10: hour = 'Good Morning 🌞'; break;
-  case 11: hour = 'Good Morning 🌨'; break;
-  case 12: hour = 'Good Morning ❄'; break;
-  case 13: hour = 'Good Morning 🌤'; break;
-  case 14: hour = 'Good Afternoon 🌇'; break;
-  case 15: hour = 'Good Afternoon 🥀'; break;
-  case 16: hour = 'Good Afternoon 🌹'; break;
-  case 17: hour = 'Good Afternoon 🌆'; break;
-  case 18: hour = 'Good Night 🌙'; break;
-  case 19: hour = 'Good Night 🌃'; break;
-  case 20: hour = 'Good Night 🌌'; break;
-  case 21: hour = 'Good Night 🌃'; break;
-  case 22: hour = 'Good Night 🌙'; break;
-  case 23: hour = 'Good Night 🌃'; break;
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 4) return 'Late Night 🌙'
+  if (hour < 12) return 'Good Morning 🌅'
+  if (hour < 17) return 'Good Afternoon ☀️'
+  if (hour < 20) return 'Good Evening 🌇'
+  return 'Good Night 🌙'
 }
-var greeting = hour;
+
+const readMore = String.fromCharCode(8206).repeat(4001)
+
+// ===== COMMAND SETUP ===== //
+handler.help = ['menu', 'help', 'cmd']
+handler.tags = ['main']
+handler.command = ['menu', 'help', 'm', 'menú', 'allmenu']
+handler.register = false
+
+export default handler
