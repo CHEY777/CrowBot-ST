@@ -1,38 +1,52 @@
-// By chey >> https://github.com/Cheysan
+// By WillZek >> https://github.com/CheySan
 
 import fetch from 'node-fetch';
-import fg from 'senna-fg';
 
-let handler = async(m, { conn, usedPrefix, command, text }) => {
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+    if (!text) {
+        return m.reply(`🍭 Please enter a search term for YouTube.\n> *Example:* ${usedPrefix + command} crow edits`);
+    }
 
-if (!text) return m.reply(`🍭 Enter Text To Search On Youtube\n> *Example:* ${usedPrefix + command} chey edits`);
+    try {
+        // YouTube Search API
+        let api = await fetch(`https://delirius-apiofc.vercel.app/search/ytsearch?q=${encodeURIComponent(text)}`);
+        let res = await api.json();
 
-try {
-let api = await (await fetch(`https://delirius-apiofc.vercel.app/search/ytsearch?q=${text}`)).json();
+        if (!res?.data?.length) throw new Error('No results found');
 
-let results = api.data[0];
+        let result = res.data[0];
 
-let txt = `✨ *Title:* ${results.title}\n⌛ *Duration:* ${results.duration}\n📎 *Link:* ${results.url}\n📆 *Published:* ${results.publishedAt}`;
+        let caption = `✨ *Title:* ${result.title}\n⌛ *Duration:* ${result.duration}\n📎 *Link:* ${result.url}\n📆 *Published:* ${result.publishedAt}`;
+        let thumb = result.image;
 
-let img = results.image;
+        // Send video thumbnail and info
+        await conn.sendMessage(m.chat, {
+            image: { url: thumb },
+            caption: caption
+        }, { quoted: m });
 
-conn.sendMessage(m.chat, { image: { url: img }, caption: txt }, { quoted: m });
+        // Fetch MP3 download link
+        let dl = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(result.url)}`);
+        let mp3 = await dl.json();
 
-/* let api2 = await(await fetch(`https://api.neoxr.eu/api/youtube?url=${results.url}&type=audio&quality=128kbps&apikey=GataDios`)).json();
+        if (!mp3?.result?.download?.url) {
+            throw new Error('Could not retrieve audio');
+        }
 
-if (!api2?.data.url) return m.reply('No Results Found');
-*/
+        // Send MP3 audio
+        await conn.sendMessage(m.chat, {
+            audio: { url: mp3.result.download.url },
+            mimetype: 'audio/mpeg'
+        }, { quoted: m });
 
-let api2 = await(await fetch(`https://api.vreden.my.id/api/ytmp3?url=${results.url}`)).json();
-
-conn.sendMessage(m.chat, { audio: { url: api2.result.download.url }, mimetype: 'audio/mpeg' }, { quoted: m });
-
-} catch (e) {
-m.reply(`*We Didn't Find Any Results For Your Search* ${e.message}\n> Posdata: 🥺`);
-m.react('✖️');
-  }
-}
+    } catch (e) {
+        m.reply(`*Could not find results for your search.*\nReason: ${e.message}`);
+        await m.react('✖️');
+    }
+};
 
 handler.command = ['play', 'paudio'];
+handler.help = ['play <text>'];
+handler.tags = ['downloader'];
 
-export default handler
+export default handler;
