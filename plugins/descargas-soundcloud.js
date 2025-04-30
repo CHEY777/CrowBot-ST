@@ -2,22 +2,22 @@ import fetch from "node-fetch";
 import yts from 'yt-search';
 import axios from "axios";
 
-const formatAudio = ['mp3', 'm4a', 'webm', 'acc', 'flac', 'opus', 'ogg', 'wav'];
-const formatVideo = ['360', '480', '720', '1080', '1440', '4k'];
+const audioFormats = ['mp3', 'm4a', 'webm', 'acc', 'flac', 'opus', 'ogg', 'wav'];
+const videoFormats = ['360', '480', '720', '1080', '1440', '4k'];
 
 const ddownr = {
   download: async (url, format) => {
-    if (!formatAudio.includes(format) && !formatVideo.includes(format)) {
-      throw new Error('Formato no soportado, verifica la lista de formatos disponibles.');
+    if (!audioFormats.includes(format) && !videoFormats.includes(format)) {
+      throw new Error('Unsupported format. Please check the list of available formats.');
     }
 
     const config = {
       method: 'GET',
       url: `https://p.oceansaver.in/ajax/download.php?format=${format}&url=${encodeURIComponent(url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91.0.4472.124 Safari/537.36'
       }
-    };;
+    };
 
     try {
       const response = await axios.request(config);
@@ -25,28 +25,29 @@ const ddownr = {
       if (response.data && response.data.success) {
         const { id, title, info } = response.data;
         const { image } = info;
-        const downloadUrl = await ddownr.cekProgress(id);
+        const downloadUrl = await ddownr.checkProgress(id);
 
         return {
-          id: id,
-          image: image,
-          title: title,
-          downloadUrl: downloadUrl
+          id,
+          image,
+          title,
+          downloadUrl
         };
       } else {
-        throw new Error('Fallo al obtener los detalles del video.');
+        throw new Error('Failed to get video details.');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Download Error:', error);
       throw error;
     }
   },
-  cekProgress: async (id) => {
+
+  checkProgress: async (id) => {
     const config = {
       method: 'GET',
       url: `https://p.oceansaver.in/ajax/progress.php?id=${id}`,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91.0.4472.124 Safari/537.36'
       }
     };
 
@@ -60,7 +61,7 @@ const ddownr = {
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Progress Error:', error);
       throw error;
     }
   }
@@ -69,19 +70,19 @@ const ddownr = {
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text.trim()) {
-      return conn.reply(m.chat, `✎ ingresa el nombre de la música a descargar.`, m);
+      return conn.reply(m.chat, `✎ Please enter the name of the song to download.`, m);
     }
 
     const search = await yts(text);
     if (!search.all || search.all.length === 0) {
-      return m.reply('No se encontraron resultados para tu búsqueda.');
+      return m.reply('No results found for your search.');
     }
 
     const videoInfo = search.all[0];
     const { title, thumbnail, timestamp, views, ago, url } = videoInfo;
-    const vistas = formatViews(views);
-    const infoMessage = `「✦」Descargando *${title}*\n\n> ✦Canal  *${videoInfo.author.name || 'Desconocido'}*\n> ✰ Vistas  *${views}*\n> ⴵ Duración » *${timestamp}*\n> ✐ Publicación » *${ago}*\n> 🜸 Link  ${url}\n`;
-       const thumb = (await conn.getFile(thumbnail))?.data;
+    const formattedViews = formatViews(views);
+    const infoMessage = `「✦」Downloading *${title}*\n\n> ✦Channel:  *${videoInfo.author.name || 'Unknown'}*\n> ✰ Views:  *${formattedViews}*\n> ⴵ Duration: *${timestamp}*\n> ✐ Published: *${ago}*\n> 🜸 Link: ${url}\n`;
+    const thumb = (await conn.getFile(thumbnail))?.data;
 
     const JT = {
       contextInfo: {
@@ -98,15 +99,15 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       },
     };
 
-      await conn.reply(m.chat, infoMessage, m, JT);
+    await conn.reply(m.chat, infoMessage, m, JT);
 
-    if (command === 'play' || command === 'yta' || command === 'mp3') {
-        const api = await ddownr.download(url, 'mp3');
-        const result = api.downloadUrl;
-        await conn.sendMessage(m.chat, { audio: { url: result }, mimetype: "audio/mpeg" }, { quoted: m });
+    if (['play', 'yta', 'mp3'].includes(command)) {
+      const api = await ddownr.download(url, 'mp3');  // normal mp3 quality
+      const result = api.downloadUrl;
+      await conn.sendMessage(m.chat, { audio: { url: result }, mimetype: "audio/mpeg" }, { quoted: m });
 
-    } else if (command === 'play2' || command === 'ytv' || command === 'mp4') {
-      let sources = [
+    } else if (['play2', 'ytv', 'mp4'].includes(command)) {
+      const sources = [
         `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`,
         `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
         `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
@@ -126,28 +127,28 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
               video: { url: downloadUrl },
               fileName: `${title}.mp4`,
               mimetype: 'video/mp4',
-              caption: `✎Aqui tienes tu video`,
+              caption: `✎ Here is your video`,
               thumbnail: thumb
             }, { quoted: m });
             break;
           }
         } catch (e) {
-          console.error(`Error con la fuente ${source}:`, e.message);
+          console.error(`Error from source ${source}:`, e.message);
         }
       }
 
       if (!success) {
-        return m.reply(` ✱ *No se pudo descargar el video:* No se encontró un enlace de descarga válido.`);
+        return m.reply(`✱ *Unable to download video:* No valid download link found.`);
       }
     } else {
-      throw "Comando no reconocido.";
+      throw new Error("Unrecognized command.");
     }
   } catch (error) {
     return m.reply(`𓁏 *Error:* ${error.message}`);
   }
 };
 
-handler.command = handler.help = ['play', 'play2', 'mp3', 'yta', 'mp4', 'ytv']; 
+handler.command = handler.help = ['play', 'play2', 'mp3', 'yta', 'mp4', 'ytv'];
 handler.tags = ['downloader'];
 
 export default handler;
@@ -158,4 +159,4 @@ function formatViews(views) {
   } else {
     return views.toString();
   }
-          }
+}
