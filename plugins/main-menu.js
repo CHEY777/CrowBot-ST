@@ -28,7 +28,7 @@ const vid = 'https://files.catbox.moe/ic2ct6.mp4';
 const defaultMenu = {
   before: `*•:•:•:•:•:•:•:•:•:•☾☼☽•:•.•:•.•:•:•:•:•:•*
 
-"「🔮」 ¡Hola! *%name* %greeting, Para Ver Tu Perfil Usa *#perfil* ❒"
+"「🔮」 ¡Hola! *%name* %greeting, To View Your Profile Use *#prefix* ❒"
 
 ╔━━━━━ *⊱𝐈𝐍𝐅𝐎 - 𝐁𝐎𝐓⊰*
 ✦  👤 *Client:* %name
