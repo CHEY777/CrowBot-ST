@@ -1,5 +1,4 @@
 let handler = async (m, { conn }) => {
-
   let img = 'https://files.catbox.moe/7kh8e5.jpg' 
   let texto = `• 𝐌𝐄𝐍𝐔 +18 •
 「 🔞 *ADULT COMMANDS* 🔞 」
@@ -21,19 +20,9 @@ let handler = async (m, { conn }) => {
 ║➤ 🍒 _.sixnine_ (@tag)`
 
   await conn.sendMessage(m.chat, {
-    text: texto,
-    contextInfo: {
-      externalAdReply: {
-        title: '𓂂𓏸  𐅹੭੭ ᴘᴏʀɴᴏɢʀᴀᴘʜʏ ᴍᴇɴᴜ 🌙 ᦡᦡ',
-        body: 'Adult Features Menu',
-        thumbnailUrl: img,
-        sourceUrl: img,
-        mediaType: 1,
-        renderLargerThumbnail: true,
-        showAdAttribution: false
-      }
-    }
-  }, { quoted: m }) // optional: quoted message can be kept or removed
+    image: { url: img },
+    caption: texto
+  }, { quoted: m })
 }
 
 handler.help = ['menuhot (menu +18)']
