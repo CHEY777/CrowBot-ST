@@ -1,26 +1,25 @@
-
-const handler = async (m, {conn}) => {
-  m.reply(m.chat, global.terminos, m, rcanal);
+const handler = async (m, { conn }) => {
+  m.reply(m.chat, global.terms, m, rcanal);
 };
-handler.customPrefix = /términos y condiciones y privacidad|terminosycondicionesyprivacidad|terminosycondiciones|terminos y condiciones y privacidad|terminos y condiciones|terminos y condiciones|terminos de uso|Terminos de uso|Terminó se uso|términos de uso|Términos de uso|Términos y condiciones/i;
+
+handler.customPrefix = /terms and conditions and privacy|termsandconditionsandprivacy|termsandconditions|terms and conditions|terms of use|Terms of use|Term of use|Terms of Use/i;
 handler.command = new RegExp;
 export default handler;
 
-global.terminos = `𝑺𝑴𝑺 𝑫𝑬𝑳 𝑪𝑹𝑬𝑨𝑫𝑶𝑹✨
+global.terms = `✨ 𝑴𝑬𝑺𝑺𝑨𝑮𝑬 𝑭𝑹𝑶𝑴 𝑻𝑯𝑬 𝑪𝑹𝑬𝑨𝑻𝑶𝑹 ✨
 
-⚠️𝐀𝐃𝐕𝐄𝐑𝐓𝐄𝐍𝐂𝐈𝐀 𝐃𝐄𝐋 𝐂𝐑𝐄𝐀𝐃𝐎𝐑 ( *WillZek* )⚠️
+⚠️ WARNING FROM THE CREATOR (*Chey*) ⚠️
 
-𝑫𝒊𝒆𝒈𝒐 𝑵𝒐 𝑺𝒆 𝑯𝒂𝒄𝒆 𝑹𝒆𝒔𝒑𝒐𝒏𝒔𝒂𝒃𝒍𝒆 𝑫𝒆𝒍 𝑴𝒂𝒍 𝑼𝒔𝒐 𝑫𝒆𝒍 𝑩𝒐𝒕 𝑶 𝑺𝒖𝒃𝒃𝒐𝒕, 𝑪𝒂𝒅𝒂 𝑷𝒆𝒓𝒔𝒐𝒏𝒂 𝑼𝒔𝒂 𝑺𝒖 𝑩𝒐𝒕 𝑨 𝑺𝒖 𝑴𝒂𝒏𝒆𝒓𝒂. 𝑫𝒊𝒆𝒈𝒐 𝑵𝒐 𝑺𝒆 𝑯𝒂𝒄𝒆 𝑪𝒂𝒓𝒈𝒐 𝑫𝒆 𝑳𝒐 𝑸𝒖𝒆 𝑷𝒂𝒔𝒂𝒓𝒂 𝑨 𝑺𝒖 𝑪𝒖𝒆𝒏𝒕𝒂 𝑺𝒊 𝑼𝒔𝒂 𝑴𝒂𝒍 𝑬𝒍 𝑩𝒐𝒕.
+Diego is not responsible for the misuse of the bot or subbot. Each user is responsible for how they use their bot. Diego will not be held accountable for anything that happens to your account if you misuse the bot.
 
-𝑬𝒍 𝑩𝒐𝒕 𝑬𝒔 𝑺𝒊𝒎𝒑𝒍𝒆 𝑷𝒆𝒓𝒐 𝑪𝒐𝒏 𝑪𝒐𝒎𝒂𝒏𝒅𝒐𝒔 𝑫𝒊𝒗𝒆𝒓𝒕𝒊𝒅𝒐𝒔, 𝑸𝒖𝒊𝒆𝒓𝒆𝒔 𝑽𝒆𝒓 𝑳𝒐𝒔 𝑪𝒐𝒎𝒂𝒏𝒅𝒐𝒔? 𝑬𝒔𝒄𝒓𝒊𝒃𝒆 #menu.
+The bot is simple but has fun commands. Want to see the commands? Type #menu.
 
-𝑩𝒐𝒕 𝑼𝒔𝒐 𝑷𝒖𝒃𝒍𝒊𝒄𝒐 𝑷𝒂𝒓𝒂 𝑻𝒐𝒅𝒂𝒔 𝑳𝒂𝒔 𝑷𝒆𝒓𝒔𝒐𝒏𝒂𝒔 𝑸𝒖𝒆 𝑷𝒖𝒆𝒅𝒂𝒏 𝑼𝒔𝒂𝒓𝒍𝒐, 𝑮𝒓𝒂𝒄𝒊𝒂𝒔 𝑷𝒐𝒓 𝑷𝒓𝒆𝒇𝒆𝒓𝒊𝒓𝒏𝒐𝒔 𝑼𝒔𝒂 𝑵𝒖𝒆𝒔𝒕𝒓𝒐 𝑩𝒐𝒕, 𝑬𝒍 𝑩𝒐𝒕 𝑬𝒔 𝑺𝒊𝒎𝒑𝒍𝒆 𝑷𝒆𝒓𝒐 𝑫𝒊𝒗𝒆𝒓𝒕𝒊𝒅𝒐✨
+This is a public bot available for everyone who wants to use it. Thank you for choosing to use our bot. It may be simple, but it's fun! ✨
 
-𝑪𝒐𝒏𝒕𝒂𝒄𝒕𝒂𝒏𝒐𝒔🚀
+Contact us 🚀
 
 ✫ ${global.creador}
-᯽ Niño Piña
-✫ Correo electronico: 
-ninopina10@gmail.com
+᯽ chey
+✫ Email: chaitanya811678@gmail.com
 
 ✰ ${global.packname}`;
