@@ -1,4 +1,4 @@
-//Codígo creado por Destroy wa.me/584120346669
+// Code created by chey wa.me/918116781147
 
 import fs from 'fs';
 import path from 'path';
@@ -6,27 +6,27 @@ import path from 'path';
 let handler = async (m, { conn, usedPrefix }) => {
     let who;
     
-    // Verificamos si se menciona a alguien o se cita un mensaje
+    // Check if someone is mentioned or if a message is quoted
     if (m.mentionedJid.length > 0) {
-        who = m.mentionedJid[0]; // Si hay mención, usamos esa
+        who = m.mentionedJid[0]; // If there's a mention, use that
     } else if (m.quoted) {
-        who = m.quoted.sender; // Si se cita un mensaje, usamos el emisor de ese mensaje
+        who = m.quoted.sender; // If a message is quoted, use the sender of that message
     } else {
-        who = m.sender; // En caso contrario, usamos el emisor
+        who = m.sender; // Otherwise, use the sender of the message
     }
 
-    let name = conn.getName(who); // Nombre de la persona mencionada o del emisor
-    let name2 = conn.getName(m.sender); // Nombre del usuario que envía el comando
+    let name = conn.getName(who); // Get the name of the mentioned person or the sender
+    let name2 = conn.getName(m.sender); // Get the name of the user sending the command
     m.react('🫂');
 
-    // Construimos el mensaje dependiendo de si hay una mención o no
+    // Construct the message depending on whether there's a mention or not
     let str;
     if (m.mentionedJid.length > 0) {
-        str = `\`${name2}\` le dió un fuerte abrazo a \`${name || who}\`.`; // Usamos nombre agendado o número si no está agendado
+        str = `\`${name2}\` gave a big hug to \`${name || who}\`.`; // Use scheduled name or number if not saved
     } else if (m.quoted) {
-        str = `\`${name2}\` abrazo a \`${name || who}\`.`; // Mensaje cuando se cita a otro usuario
+        str = `\`${name2}\` hugged \`${name || who}\`.`; // Message when quoting another user
     } else {
-        str = `\`${name2}\` se abrazó a sí mismo`.trim();
+        str = `\`${name2}\` hugged themselves`.trim();
     }
     
     if (m.isGroup) {
@@ -42,15 +42,15 @@ let handler = async (m, { conn, usedPrefix }) => {
         const videos = [pp, pp2, pp3, pp4, pp5, pp6, pp7, pp8];
         const video = videos[Math.floor(Math.random() * videos.length)];
         
-        // Enviamos el mensaje con el video y el mensaje correspondiente
-        let mentions = [who]; // Mencionamos al usuario que se ha citado o mencionado
+        // Send the message with the video and the corresponding text
+        let mentions = [who]; // Mention the user that was cited or mentioned
         conn.sendMessage(m.chat, { video: { url: video }, gifPlayback: true, caption: str, mentions }, { quoted: m });
     }
 }
 
 handler.help = ['hug/abrazar @tag'];
 handler.tags = ['emox'];
-handler.command = ['hug','abrazar'];
+handler.command = ['hug', 'abrazar'];
 handler.group = true;
 
 export default handler;
